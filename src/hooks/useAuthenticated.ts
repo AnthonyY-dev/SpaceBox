@@ -11,6 +11,7 @@ const useAuthenticated = () => {
        navigate("/");
      }
    }, []);
+   return accessCode
 }
 
 export default useAuthenticated

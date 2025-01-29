@@ -5,14 +5,14 @@ import { LuPackage, LuPlus, LuSearch, LuSettings } from "react-icons/lu";
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
-  useAuthenticated();
+  const accessCode = useAuthenticated();
 
   const handleEnterKey = (data: string) => {};
 
   return (
     <div>
       <Image src="dashboard.png" />
-      <Link to="/find">
+      <Link to={"/find?code=" + accessCode}>
         <Button
           position={"absolute"}
           top={"25px"}
@@ -37,7 +37,7 @@ const Dashboard = () => {
           </Flex>
         </Button>
       </Link>
-      <Link to="/catalog">
+      <Link to={"/catalog?code=" + accessCode}>
         <Button
           position={"absolute"}
           top={"25px"}
@@ -62,7 +62,7 @@ const Dashboard = () => {
           </Flex>
         </Button>
       </Link>
-      <Link to="/settings">
+      <Link to={"/settings?code=" + accessCode}>
         <Button
           position={"absolute"}
           bottom={"15px"}
@@ -94,7 +94,7 @@ const Dashboard = () => {
           </Flex>
         </Button>
       </Link>
-      <Link to="/new">
+      <Link to={"/new?code=" + accessCode}>
         <Button
           position={"absolute"}
           bottom={"15px"}
