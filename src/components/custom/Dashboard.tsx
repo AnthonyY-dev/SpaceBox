@@ -1,6 +1,8 @@
 import BarcodeReader from "@/components/custom/BarcodeReader";
 import useAuthenticated from "@/hooks/useAuthenticated";
-import { Button, Image } from "@chakra-ui/react";
+import { Button, Flex, Image, Text } from "@chakra-ui/react";
+import { LuPackage, LuPlus, LuSearch, LuSettings } from "react-icons/lu";
+import { Link } from "react-router-dom";
 
 const Dashboard = () => {
   useAuthenticated();
@@ -10,50 +12,120 @@ const Dashboard = () => {
   return (
     <div>
       <Image src="dashboard.png" />
-      <Button
-        position={"absolute"}
-        top={"25px"}
-        left="32px"
-        h="156px"
-        w="185px"
-        bgColor="#ff5757"
-        onClick={() => {
-          console.log("Red");
-        }}
-      />
-      <Button
-        position={"absolute"}
-        top={"25px"}
-        right="32px"
-        h="156px"
-        w="185px"
-        bgColor="#99ff5b"
-        onClick={() => {
-          console.log("Green");
-        }}
-      />
-      <Button
-        position={"absolute"}
-        bottom={"15px"}
-        right="32px"
-        h="101px"
-        w="185px"
-        bgColor="#545454"
-        onClick={() => {
-          console.log("Gray");
-        }}
-      />
-      <Button
-        position={"absolute"}
-        bottom={"15px"}
-        left="32px"
-        h="101px"
-        w="185px"
-        bgColor="#38b6ff"
-        onClick={() => {
-          console.log("Blue");
-        }}
-      />
+      <Link to="/find">
+        <Button
+          position={"absolute"}
+          top={"25px"}
+          left="32px"
+          h="156px"
+          w="185px"
+          bgColor="#ff5757"
+          className="dashBtn"
+        >
+          <Flex
+            w="full"
+            h="full"
+            alignItems={"center"}
+            flexDir={"column"}
+            padding={"10px"}
+            justifyContent={"space-evenly"}
+          >
+            <LuSearch color="white" style={{ width: 75, height: 75 }} />
+            <Text className="text" color="white" fontSize={"2xl"}>
+              Find Location
+            </Text>
+          </Flex>
+        </Button>
+      </Link>
+      <Link to="/catalog">
+        <Button
+          position={"absolute"}
+          top={"25px"}
+          right="32px"
+          h="156px"
+          w="185px"
+          bgColor="#99ff5b"
+          className="dashBtn"
+        >
+          <Flex
+            w="full"
+            h="full"
+            alignItems={"center"}
+            flexDir={"column"}
+            padding={"10px"}
+            justifyContent={"space-evenly"}
+          >
+            <LuPackage color="#2B2B2B" style={{ width: 75, height: 75 }} />
+            <Text className="text" color="#2B2B2B" fontSize={"2xl"}>
+              Catalog
+            </Text>
+          </Flex>
+        </Button>
+      </Link>
+      <Link to="/settings">
+        <Button
+          position={"absolute"}
+          bottom={"15px"}
+          right="32px"
+          h="101px"
+          w="185px"
+          bgColor="#545454"
+          className="dashBtn"
+        >
+          <Flex
+            w="full"
+            h="full"
+            alignItems={"center"}
+            flexDir={"column"}
+            padding={"10px"}
+            justifyContent={"space-evenly"}
+          >
+            <Text
+              className="text"
+              color="white"
+              fontSize={"2xl"}
+              display={"flex"}
+              gap="7px"
+              alignItems={"center"}
+            >
+              <LuSettings style={{ width: 50, height: 50 }} />
+              Settings
+            </Text>
+          </Flex>
+        </Button>
+      </Link>
+      <Link to="/new">
+        <Button
+          position={"absolute"}
+          bottom={"15px"}
+          left="32px"
+          h="101px"
+          w="185px"
+          bgColor="#38b6ff"
+          className="dashBtn"
+        >
+          <Flex
+            w="full"
+            h="full"
+            alignItems={"center"}
+            flexDir={"column"}
+            padding={"10px"}
+            justifyContent={"space-evenly"}
+          >
+            <Text
+              className="text"
+              color="white"
+              fontSize={"2xl"}
+              display={"flex"}
+              gap="7px"
+              alignItems={"center"}
+            >
+              <LuPlus style={{ width: 50, height: 50 }} />
+              New
+            </Text>
+          </Flex>
+        </Button>
+      </Link>
       <BarcodeReader handleEnterKey={handleEnterKey} />
     </div>
   );

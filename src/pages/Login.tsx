@@ -25,6 +25,7 @@ const Login = () => {
         top={202}
         left={145}
         className={"loginText" + (invalidMarker ? " red" : "")}
+        fontSize={"xl"}
       >
         Please scan the
         <br />
