@@ -1,13 +1,27 @@
 import { Avatar } from "@/components/ui/avatar";
 import useAuthenticated from "@/hooks/useAuthenticated";
-import { Button, Flex, Group, Spinner, Text, VStack } from "@chakra-ui/react";
+import {
+  Button,
+  Flex,
+  Group,
+  IconButton,
+  Spinner,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { LuCog, LuHouse, LuToggleLeft, LuTrash } from "react-icons/lu";
+import {
+  LuHouse,
+  LuToggleLeft,
+  LuToggleRight,
+  LuTrash,
+  LuX,
+} from "react-icons/lu";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import supabase from "@/hooks/supabase";
 import Item from "@/types/Item";
-import Box from "@/types/Box";
 import isoToMMDDYY from "@/functions/isoToMMDDYY";
+
 function ItemDataPage() {
   const { id } = useParams();
 
@@ -15,32 +29,35 @@ function ItemDataPage() {
 
   const [itemData, setItemData] = useState<Item | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [boxName, setBoxName] = useState<string | null>(null);
   const navigate = useNavigate();
-  useEffect(() => {
-    async function loadItems() {
-      const { data, error } = await supabase
-        .from("items")
-        .select("*")
-        .eq("id", id);
 
-      if (error) {
-        setLoading(false);
-      } else {
-        if (data.length == 0) {
-          navigate("/dashboard?code=" + accessCode);
-        }
-        setItemData(data[0]);
-        setLoading(false);
+  async function loadItems() {
+    const { data, error } = await supabase
+      .from("items")
+      .select("*")
+      .eq("id", id);
+
+    if (error) {
+      setLoading(false);
+    } else {
+      if (data.length == 0) {
+        navigate("/catalog?code=" + accessCode);
       }
+      setItemData(data[0]);
+
+      setLoading(false);
     }
+  }
+
+  useEffect(() => {
     loadItems();
   }, []);
 
-  const [boxName, setBoxName] = useState<string | null>(null);
   useEffect(() => {
     async function loadBoxName() {
       if (itemData != null) {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from("boxes")
           .select("*")
           .eq("id", itemData.location)
@@ -50,6 +67,18 @@ function ItemDataPage() {
     }
     loadBoxName();
   }, [itemData]);
+
+  const toggleUsing = () => {
+    async function toggleUsing() {
+      await supabase
+        .from("items")
+        .update({ inUse: !itemData?.inUse })
+        .eq("id", itemData?.id);
+    }
+    toggleUsing();
+
+    window.location.reload();
+  };
   return loading ? (
     <VStack margin="auto" marginTop={"125px"}>
       <Spinner />
@@ -104,9 +133,14 @@ function ItemDataPage() {
           width={"33.333%"}
           flexDir={"column"}
           className="text"
-          bg="green.500"
+          bg={itemData?.inUse ? "green.500" : "red.500"}
+          onClick={toggleUsing}
         >
-          <LuToggleLeft style={{ height: 50, width: 50 }} />
+          {itemData?.inUse ? (
+            <LuToggleRight style={{ height: 50, width: 50 }} />
+          ) : (
+            <LuToggleLeft style={{ height: 50, width: 50 }} />
+          )}
           Toggle Using
         </Button>
         <Button
@@ -131,6 +165,16 @@ function ItemDataPage() {
           Delete Item
         </Button>
       </Group>
+      <Link to={"/catalog?code=" + accessCode}>
+        <IconButton
+          position={"absolute"}
+          right="10px"
+          top="10px"
+          variant={"subtle"}
+        >
+          <LuX />
+        </IconButton>
+      </Link>
     </Flex>
   );
 }
