@@ -1,6 +1,6 @@
 import BarcodeReader from "@/components/custom/BarcodeReader";
 import { Image, Text } from "@chakra-ui/react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
