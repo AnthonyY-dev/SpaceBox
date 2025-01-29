@@ -5,4 +5,9 @@
   font-family: "Poppins";
   font-size: x-large;
   text-align: center;
+  transition: color 150ms ease-in;
+}
+
+.red {
+  color: rgb(242, 109, 109);
 }

@@ -1,19 +1,36 @@
 import BarcodeReader from "@/components/custom/BarcodeReader";
 import { Image, Text } from "@chakra-ui/react";
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [invalidMarker, setIM] = useState(false);
+  const navigate = useNavigate();
 
-  const handleEnterKey = (data: string) => {};
+  const handleEnterKey = (data: string) => {
+    if (data == import.meta.env.VITE_BARCODE_PASSWORD) {
+      navigate("/dashboard?code=" + data);
+    } else {
+      setIM(true);
+      setTimeout(() => {
+        setIM(false);
+      }, 500);
+    }
+  };
   return (
     <div>
       <Image src="login.png" />
-      <Text position={"absolute"} top={202} left={145} className="loginText">
+      <Text
+        position={"absolute"}
+        top={202}
+        left={145}
+        className={"loginText" + (invalidMarker ? " red" : "")}
+      >
         Please scan the
         <br />
         access code
       </Text>
-      <BarcodeReader ref={inputRef} handleEnterKey={handleEnterKey} />
+      <BarcodeReader handleEnterKey={handleEnterKey} />
     </div>
   );
 };
