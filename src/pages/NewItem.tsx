@@ -26,6 +26,7 @@ import { useEffect, useState } from "react";
 import Box from "@/types/Box";
 import Space from "@/types/Space";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import BarcodeReader from "@/components/custom/BarcodeReader";
 
 type itemInputs = {
   itemName: string;
@@ -54,6 +55,18 @@ const NewItem = () => {
   const [secondLoad, setSecondLoad] = useState<boolean>(false);
   const navigate = useNavigate();
 
+  const handleBarcodeRead = (data: string) => {
+    if (data.startsWith("ITEM")) {
+      navigate("/item/" + data + "?code=" + accessCode);
+    }
+    if (data.startsWith("BOX")) {
+      navigate("/box/" + data + "?code=" + accessCode);
+    }
+    if (data.startsWith("SPACE")) {
+      navigate("/space/" + data + "?code=" + accessCode);
+    }
+  };
+
   const {
     register: iRegister,
     handleSubmit: iHandleSubmit,
@@ -63,14 +76,12 @@ const NewItem = () => {
   const {
     register: bRegister,
     handleSubmit: bHandleSubmit,
-    watch: bWatch,
     control: bControl,
     formState: { errors: bErrors },
   } = useForm<boxInputs>();
   const {
     register: sRegister,
     handleSubmit: sHandleSubmit,
-    watch: sWatch,
     formState: { errors: sErrors },
   } = useForm<spaceInputs>();
 
@@ -94,8 +105,6 @@ const NewItem = () => {
         .eq("id", "ITEM" + id.toString());
     }
 
-    // new id found
-    console.log(data);
     await supabase.from("items").insert({
       id: "ITEM" + id.toString(),
       name: data.itemName,
@@ -131,8 +140,98 @@ const NewItem = () => {
     );
   };
 
-  const boxOnSubmit: SubmitHandler<boxInputs> = (data) => console.log(data);
-  const spaceOnSubmit: SubmitHandler<spaceInputs> = (data) => console.log(data);
+  const boxOnSubmit: SubmitHandler<boxInputs> = async (data) => {
+    setSecondLoad(true);
+    if (!data.boxName || data.space.length == 0) {
+      return;
+    }
+    var id = Math.floor(100000 + Math.random() * 900000);
+
+    let idCheckData = await supabase
+      .from("boxes")
+      .select("*")
+      .eq("id", "BOX" + id.toString());
+
+    while (idCheckData?.data && idCheckData.data.length > 0) {
+      id = Math.floor(100000 + Math.random() * 900000);
+      idCheckData = await supabase
+        .from("boxes")
+        .select("*")
+        .eq("id", "BOX" + id.toString());
+    }
+
+    await supabase.from("boxes").insert({
+      id: "BOX" + id.toString(),
+      boxName: data.boxName,
+      boxImageUrl: "",
+      space: data.space[0],
+      items: [],
+    });
+    const { data: spaces } = await supabase
+      .from("spaces")
+      .select("*")
+      .eq("id", data.space[0]);
+
+    if (!spaces || spaces.length === 0) {
+      console.error("Space not found");
+      return;
+    }
+
+    const space = spaces[0];
+    const newSpaceBoxesArray = [...(space.boxes || []), "BOX" + id.toString()];
+
+    await supabase
+      .from("spaces")
+      .update({ boxes: newSpaceBoxesArray })
+      .eq("id", data.space[0]);
+
+    navigate(
+      "/dashboard?code=" +
+        accessCode +
+        "&msg=" +
+        encodeURIComponent(
+          "Box successfully created! Please print a code with Barcode ID: BOX" +
+            id.toString()
+        )
+    );
+  };
+  const spaceOnSubmit: SubmitHandler<spaceInputs> = async (data) => {
+    if (!data.spaceName) {
+      return;
+    }
+    setSecondLoad(true);
+
+    var id = Math.floor(100000 + Math.random() * 900000);
+
+    let idCheckData = await supabase
+      .from("spaces")
+      .select("*")
+      .eq("id", "SPACE" + id.toString());
+
+    while (idCheckData?.data && idCheckData.data.length > 0) {
+      id = Math.floor(100000 + Math.random() * 900000);
+      idCheckData = await supabase
+        .from("spaces")
+        .select("*")
+        .eq("id", "SPACE" + id.toString());
+    }
+
+    await supabase.from("spaces").insert({
+      id: "SPACE" + id.toString(),
+      boxes: [],
+      spaceImageUrl: "",
+      spaceName: data.spaceName,
+    });
+
+    navigate(
+      "/dashboard?code=" +
+        accessCode +
+        "&msg=" +
+        encodeURIComponent(
+          "Space created successfully! Barcode ID: SPACE" + id.toString()
+        )
+    );
+  };
 
   async function load() {
     const { data, error } = await supabase.from("boxes").select("*");
@@ -192,177 +291,180 @@ const NewItem = () => {
           <Text>Loading...</Text>
         </VStack>
       ) : (
-        <Flex flexDir={"column"} gap={"10px"} alignItems={"center"}>
-          <Text
-            paddingTop={"5px"}
-            paddingBottom={"5px"}
-            className="text "
-            textAlign={"center"}
-            verticalAlign={"middle"}
-            bgColor={"blackAlpha.900"}
-          >
-            New Item/Box/Space Creator
-          </Text>
-          <Tabs.Root defaultValue="item" variant={"enclosed"}>
-            <Tabs.List>
-              <Tabs.Trigger value="item">
-                <LuApple />
-                Item
-              </Tabs.Trigger>
-              <Tabs.Trigger value="box">
-                <LuPackage />
-                Box
-              </Tabs.Trigger>
-              <Tabs.Trigger value="space">
-                <LuSpace />
-                Space
-              </Tabs.Trigger>
-            </Tabs.List>
-            <Tabs.Content value="item">
-              <form onSubmit={iHandleSubmit(itemOnSubmit)}>
-                <Field
-                  label="Item Name"
-                  invalid={iErrors.itemName ? true : false}
-                  errorText={iErrors.itemName && "This field is required."}
-                >
-                  <Input {...iRegister("itemName", { required: true })} />
-                </Field>
-                <Field
-                  invalid={iErrors.location ? true : false}
-                  errorText={iErrors.location && "This field is required"}
-                >
-                  <Controller
-                    name="location"
-                    rules={{ required: "This field is required" }}
-                    control={iControl}
-                    render={({ field }) => (
-                      <SelectRoot
-                        collection={boxesCollection}
-                        size="sm"
-                        marginTop={"8px"}
-                        name={field.name}
-                        // value={[field.value]}
-                        onValueChange={({ value }) => field.onChange(value)}
-                        onInteractOutside={() => field.onBlur()}
-                      >
-                        <SelectLabel>Location</SelectLabel>
-                        <SelectTrigger>
-                          <SelectValueText placeholder="Select Box" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {boxesCollection?.items?.map(
-                            (
-                              box: StupidThingThatTheStupidChakraCollectionWants
-                            ) => (
-                              <SelectItem item={box} key={box.value}>
-                                {box.label}
-                              </SelectItem>
-                            )
-                          )}
-                        </SelectContent>
-                      </SelectRoot>
-                    )}
-                  ></Controller>
-                </Field>
-                <Button
-                  width={"100%"}
-                  colorPalette={"green"}
-                  marginTop={"10px"}
-                  marginBottom={"0px"}
-                  type="submit"
-                >
-                  Create
-                </Button>
-              </form>
-            </Tabs.Content>
-            <Tabs.Content value="box">
-              <form onSubmit={bHandleSubmit(boxOnSubmit)}>
-                <Field
-                  label="Box Name"
-                  invalid={bErrors.boxName ? true : false}
-                  errorText={bErrors.boxName && "This field is required."}
-                >
-                  <Input {...bRegister("boxName", { required: true })} />
-                </Field>
-                <Field
-                  invalid={bErrors.space ? true : false}
-                  errorText={bErrors.space && "This field is required"}
-                >
-                  <Controller
-                    name="space"
-                    rules={{ required: "This field is required" }}
-                    control={bControl}
-                    render={({ field }) => (
-                      <SelectRoot
-                        collection={spacesCollection}
-                        size="sm"
-                        marginTop={"8px"}
-                        name={field.name}
-                        onValueChange={({ value }) => field.onChange(value)}
-                        onInteractOutside={() => field.onBlur()}
-                      >
-                        <SelectLabel>Space</SelectLabel>
-                        <SelectTrigger>
-                          <SelectValueText placeholder="Select Space" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {spacesCollection?.items?.map(
-                            (
-                              space: StupidThingThatTheStupidChakraCollectionWants
-                            ) => (
-                              <SelectItem item={space} key={space.value}>
-                                {space.label}
-                              </SelectItem>
-                            )
-                          )}
-                        </SelectContent>
-                      </SelectRoot>
-                    )}
-                  ></Controller>
-                </Field>
-                <Button
-                  width={"100%"}
-                  colorPalette={"green"}
-                  marginTop={"10px"}
-                  marginBottom={"0px"}
-                  type="submit"
-                >
-                  Create
-                </Button>
-              </form>
-            </Tabs.Content>
-            <Tabs.Content value="space">
-              <form onSubmit={sHandleSubmit(spaceOnSubmit)}>
-                <Field
-                  label="Space Name"
-                  invalid={sErrors.spaceName ? true : false}
-                  errorText={sErrors.spaceName && "This field is required."}
-                >
-                  <Input {...sRegister("spaceName", { required: true })} />
-                </Field>
-                <Button
-                  width={"100%"}
-                  colorPalette={"green"}
-                  marginTop={"10px"}
-                  marginBottom={"0px"}
-                  type="submit"
-                >
-                  Create
-                </Button>
-              </form>
-            </Tabs.Content>
-          </Tabs.Root>
-          <Link to={"/dashboard?code=" + accessCode}>
-            <IconButton
-              variant={"subtle"}
-              position={"absolute"}
-              top="10px"
-              right="10px"
+        <>
+          <Flex flexDir={"column"} gap={"10px"} alignItems={"center"}>
+            <Text
+              paddingTop={"5px"}
+              paddingBottom={"5px"}
+              className="text "
+              textAlign={"center"}
+              verticalAlign={"middle"}
+              bgColor={"blackAlpha.900"}
             >
-              <LuX />
-            </IconButton>
-          </Link>
-        </Flex>
+              New Item/Box/Space Creator
+            </Text>
+            <Tabs.Root defaultValue="item" variant={"enclosed"}>
+              <Tabs.List>
+                <Tabs.Trigger value="item">
+                  <LuApple />
+                  Item
+                </Tabs.Trigger>
+                <Tabs.Trigger value="box">
+                  <LuPackage />
+                  Box
+                </Tabs.Trigger>
+                <Tabs.Trigger value="space">
+                  <LuSpace />
+                  Space
+                </Tabs.Trigger>
+              </Tabs.List>
+              <Tabs.Content value="item">
+                <form onSubmit={iHandleSubmit(itemOnSubmit)}>
+                  <Field
+                    label="Item Name"
+                    invalid={iErrors.itemName ? true : false}
+                    errorText={iErrors.itemName && "This field is required."}
+                  >
+                    <Input {...iRegister("itemName", { required: true })} />
+                  </Field>
+                  <Field
+                    invalid={iErrors.location ? true : false}
+                    errorText={iErrors.location && "This field is required"}
+                  >
+                    <Controller
+                      name="location"
+                      rules={{ required: "This field is required" }}
+                      control={iControl}
+                      render={({ field }) => (
+                        <SelectRoot
+                          collection={boxesCollection}
+                          size="sm"
+                          marginTop={"8px"}
+                          name={field.name}
+                          // value={[field.value]}
+                          onValueChange={({ value }) => field.onChange(value)}
+                          onInteractOutside={() => field.onBlur()}
+                        >
+                          <SelectLabel>Location</SelectLabel>
+                          <SelectTrigger>
+                            <SelectValueText placeholder="Select Box" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {boxesCollection?.items?.map(
+                              (
+                                box: StupidThingThatTheStupidChakraCollectionWants
+                              ) => (
+                                <SelectItem item={box} key={box.value}>
+                                  {box.label}
+                                </SelectItem>
+                              )
+                            )}
+                          </SelectContent>
+                        </SelectRoot>
+                      )}
+                    ></Controller>
+                  </Field>
+                  <Button
+                    width={"100%"}
+                    colorPalette={"green"}
+                    marginTop={"10px"}
+                    marginBottom={"0px"}
+                    type="submit"
+                  >
+                    Create
+                  </Button>
+                </form>
+              </Tabs.Content>
+              <Tabs.Content value="box">
+                <form onSubmit={bHandleSubmit(boxOnSubmit)}>
+                  <Field
+                    label="Box Name"
+                    invalid={bErrors.boxName ? true : false}
+                    errorText={bErrors.boxName && "This field is required."}
+                  >
+                    <Input {...bRegister("boxName", { required: true })} />
+                  </Field>
+                  <Field
+                    invalid={bErrors.space ? true : false}
+                    errorText={bErrors.space && "This field is required"}
+                  >
+                    <Controller
+                      name="space"
+                      rules={{ required: "This field is required" }}
+                      control={bControl}
+                      render={({ field }) => (
+                        <SelectRoot
+                          collection={spacesCollection}
+                          size="sm"
+                          marginTop={"8px"}
+                          name={field.name}
+                          onValueChange={({ value }) => field.onChange(value)}
+                          onInteractOutside={() => field.onBlur()}
+                        >
+                          <SelectLabel>Space</SelectLabel>
+                          <SelectTrigger>
+                            <SelectValueText placeholder="Select Space" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {spacesCollection?.items?.map(
+                              (
+                                space: StupidThingThatTheStupidChakraCollectionWants
+                              ) => (
+                                <SelectItem item={space} key={space.value}>
+                                  {space.label}
+                                </SelectItem>
+                              )
+                            )}
+                          </SelectContent>
+                        </SelectRoot>
+                      )}
+                    ></Controller>
+                  </Field>
+                  <Button
+                    width={"100%"}
+                    colorPalette={"green"}
+                    marginTop={"10px"}
+                    marginBottom={"0px"}
+                    type="submit"
+                  >
+                    Create
+                  </Button>
+                </form>
+              </Tabs.Content>
+              <Tabs.Content value="space">
+                <form onSubmit={sHandleSubmit(spaceOnSubmit)}>
+                  <Field
+                    label="Space Name"
+                    invalid={sErrors.spaceName ? true : false}
+                    errorText={sErrors.spaceName && "This field is required."}
+                  >
+                    <Input {...sRegister("spaceName", { required: true })} />
+                  </Field>
+                  <Button
+                    width={"100%"}
+                    colorPalette={"green"}
+                    marginTop={"10px"}
+                    marginBottom={"0px"}
+                    type="submit"
+                  >
+                    Create
+                  </Button>
+                </form>
+              </Tabs.Content>
+            </Tabs.Root>
+            <Link to={"/dashboard?code=" + accessCode}>
+              <IconButton
+                variant={"subtle"}
+                position={"absolute"}
+                top="10px"
+                right="10px"
+              >
+                <LuX />
+              </IconButton>
+            </Link>
+          </Flex>
+          <BarcodeReader handleEnterKey={handleBarcodeRead} delay={250} />
+        </>
       )}
     </>
   );

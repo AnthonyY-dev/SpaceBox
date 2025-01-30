@@ -15,6 +15,12 @@ const Dashboard = () => {
     if (data.startsWith("ITEM")) {
       navigate("/item/" + data + "?code=" + accessCode);
     }
+    if (data.startsWith("BOX")) {
+      navigate("/box/" + data + "?code=" + accessCode);
+    }
+    if (data.startsWith("SPACE")) {
+      navigate("/space/" + data + "?code=" + accessCode);
+    }
   };
 
   return (

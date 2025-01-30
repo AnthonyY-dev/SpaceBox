@@ -8,11 +8,11 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import supabase from "@/hooks/supabase";
 import { Link, useNavigate } from "react-router-dom";
 import Item from "@/types/Item";
-import { LuApple, LuHammer, LuPackage, LuSpace, LuX } from "react-icons/lu";
+import { LuApple, LuPackage, LuSpace, LuX } from "react-icons/lu";
 import {
   AccordionItem,
   AccordionItemContent,
@@ -36,6 +36,12 @@ const Catalog = () => {
   const handleBarcodeRead = (data: string) => {
     if (data.startsWith("ITEM")) {
       navigate("/item/" + data + "?code=" + accessCode);
+    }
+    if (data.startsWith("BOX")) {
+      navigate("/box/" + data + "?code=" + accessCode);
+    }
+    if (data.startsWith("SPACE")) {
+      navigate("/space/" + data + "?code=" + accessCode);
     }
   };
 

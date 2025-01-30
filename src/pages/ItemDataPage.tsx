@@ -15,7 +15,6 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import supabase from "@/hooks/supabase";
 import Item from "@/types/Item";
 import isoToMMDDYY from "@/functions/isoToMMDDYY";
-import BarcodeReader from "@/components/custom/BarcodeReader";
 import DeleteItemModal from "@/components/custom/DeleteItemModal";
 import Box from "@/types/Box";
 
@@ -80,13 +79,6 @@ function ItemDataPage() {
 
     // Wait for update before reloading
     window.location.reload();
-  };
-
-  const handleBarcodeRead = (barcodeText: string) => {
-    if (barcodeText.startsWith("ITEM")) {
-      navigate("/item/" + barcodeText + "?code=" + accessCode);
-      window.location.reload();
-    }
   };
 
   return loading ? (
@@ -184,7 +176,6 @@ function ItemDataPage() {
           </IconButton>
         </Link>
       </Flex>
-      <BarcodeReader handleEnterKey={handleBarcodeRead} />
     </>
   );
 }
