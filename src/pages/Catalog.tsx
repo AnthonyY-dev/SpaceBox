@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import supabase from "@/hooks/supabase";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Item from "@/types/Item";
 import { LuApple, LuHammer, LuPackage, LuSpace, LuX } from "react-icons/lu";
 import {
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/accordion";
 import Box from "@/types/Box";
 import Space from "@/types/Space";
+import BarcodeReader from "@/components/custom/BarcodeReader";
 
 const Catalog = () => {
   var accessCode = useAuthenticated();
@@ -30,6 +31,14 @@ const Catalog = () => {
   const [dbSpacesData, setDbSpacesData] = useState<Space[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+  const navigate = useNavigate();
+
+  const handleBarcodeRead = (data: string) => {
+    if (data.startsWith("ITEM")) {
+      navigate("/item/" + data + "?code=" + accessCode);
+    }
+  };
+
   useEffect(() => {
     async function loadItems() {
       const { data: itemsData, error: error1 } = await supabase
@@ -101,7 +110,7 @@ const Catalog = () => {
         ) : (
           <AccordionRoot marginTop={"40px"} collapsible>
             <AccordionItem value="items" key="items">
-              <AccordionItemTrigger>
+              <AccordionItemTrigger key="1">
                 <Button
                   variant="outline"
                   width="450px"
@@ -120,9 +129,13 @@ const Catalog = () => {
                 display={"flex"}
                 flexDir={"column"}
                 gap="10px"
+                key="2"
               >
                 {dbItemData?.map((itemData) => (
-                  <Link to={"/item/" + itemData.id + "?code=" + accessCode}>
+                  <Link
+                    to={"/item/" + itemData.id + "?code=" + accessCode}
+                    key={itemData.id}
+                  >
                     <Button
                       variant="outline"
                       width="450px"
@@ -146,7 +159,7 @@ const Catalog = () => {
               </AccordionItemContent>
             </AccordionItem>
             <AccordionItem value="boxes" key="boxes">
-              <AccordionItemTrigger>
+              <AccordionItemTrigger key="1">
                 <Button
                   variant="outline"
                   width="450px"
@@ -165,9 +178,13 @@ const Catalog = () => {
                 display={"flex"}
                 flexDir={"column"}
                 gap="10px"
+                key="2"
               >
                 {dbBoxesData?.map((boxData) => (
-                  <Link to={"/box/" + boxData.id + "?code=" + accessCode}>
+                  <Link
+                    to={"/box/" + boxData.id + "?code=" + accessCode}
+                    key={boxData.id}
+                  >
                     <Button
                       variant="outline"
                       width="450px"
@@ -191,7 +208,7 @@ const Catalog = () => {
               </AccordionItemContent>
             </AccordionItem>
             <AccordionItem value="spaces" key="spaces">
-              <AccordionItemTrigger>
+              <AccordionItemTrigger key="1">
                 <Button
                   variant="outline"
                   width="450px"
@@ -207,12 +224,16 @@ const Catalog = () => {
                 </Button>
               </AccordionItemTrigger>
               <AccordionItemContent
+                key="2"
                 display={"flex"}
                 flexDir={"column"}
                 gap="10px"
               >
                 {dbSpacesData?.map((spaceData) => (
-                  <Link to={"/space/" + spaceData.id + "?code=" + accessCode}>
+                  <Link
+                    to={"/space/" + spaceData.id + "?code=" + accessCode}
+                    key={spaceData.id}
+                  >
                     <Button
                       variant="outline"
                       width="450px"
@@ -248,6 +269,7 @@ const Catalog = () => {
           <LuX />
         </IconButton>
       </Link>
+      <BarcodeReader handleEnterKey={handleBarcodeRead} delay={250} />
     </>
   );
 };

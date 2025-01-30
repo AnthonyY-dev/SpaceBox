@@ -2,10 +2,12 @@ import React, { useEffect, useRef } from "react";
 
 interface Props {
   handleEnterKey: (data: string) => void;
+  delay?: number;
 }
 
 const BarcodeReader = (props: Props) => {
   const inputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     // Lock focus on the input field when the component mounts
     if (inputRef.current) {
@@ -14,13 +16,16 @@ const BarcodeReader = (props: Props) => {
   }, []);
 
   const handleBlur = () => {
-    // Force focus back to the input when the user tries to deselect it
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    // Ensure the input is only refocused if it's actually blurred
+    setTimeout(() => {
+      if (inputRef.current && document.activeElement !== inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, props.delay || 0);
   };
+
   const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key != "Enter") {
+    if (event.key !== "Enter") {
       return;
     }
 
@@ -30,10 +35,10 @@ const BarcodeReader = (props: Props) => {
     props.handleEnterKey(inputRef.current.value);
     inputRef.current.value = "";
   };
+
   return (
     <input
       onBlur={handleBlur}
-      // display={"none"}
       ref={inputRef}
       style={{ opacity: 0, position: "absolute", top: -50 }}
       onKeyDown={handleKeyDown}

@@ -2,12 +2,16 @@ import BarcodeReader from "@/components/custom/BarcodeReader";
 import useAuthenticated from "@/hooks/useAuthenticated";
 import { Button, Flex, Image, Text } from "@chakra-ui/react";
 import { LuPackage, LuPlus, LuSearch, LuSettings } from "react-icons/lu";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const accessCode = useAuthenticated();
-
-  const handleEnterKey = (data: string) => {};
+  const navigate = useNavigate();
+  const handleEnterKey = (data: string) => {
+    if (data.startsWith("ITEM")) {
+      navigate("/item/" + data + "?code=" + accessCode);
+    }
+  };
 
   return (
     <div>
