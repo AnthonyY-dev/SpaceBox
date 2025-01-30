@@ -12,7 +12,7 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { LuApple, LuPackage, LuSpace, LuX } from "react-icons/lu";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   SelectContent,
   SelectItem,
@@ -22,11 +22,10 @@ import {
   SelectValueText,
 } from "@/components/ui/select";
 import supabase from "@/hooks/supabase";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Box from "@/types/Box";
 import Space from "@/types/Space";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
-import { error } from "console";
 
 type itemInputs = {
   itemName: string;
@@ -52,12 +51,13 @@ const NewItem = () => {
   const [spaces, setSpaces] = useState<Space[] | null>(null);
   const [boxesCollection, setBoxesCollection] = useState<any>(null);
   const [spacesCollection, setSpacesCollection] = useState<any>(null);
+  const [secondLoad, setSecondLoad] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const {
     register: iRegister,
     handleSubmit: iHandleSubmit,
     control: iControl,
-    watch: iWatch,
     formState: { errors: iErrors },
   } = useForm<itemInputs>();
   const {
@@ -74,7 +74,63 @@ const NewItem = () => {
     formState: { errors: sErrors },
   } = useForm<spaceInputs>();
 
-  const itemOnSubmit: SubmitHandler<itemInputs> = (data) => console.log(data);
+  const itemOnSubmit: SubmitHandler<itemInputs> = async (data) => {
+    setSecondLoad(true);
+    if (!data.itemName || data.location.length == 0) {
+      return;
+    }
+    var id = Math.floor(100000 + Math.random() * 900000);
+
+    let idCheckData = await supabase
+      .from("items")
+      .select("*")
+      .eq("id", "ITEM" + id.toString());
+
+    while (idCheckData?.data && idCheckData.data.length > 0) {
+      id = Math.floor(100000 + Math.random() * 900000);
+      idCheckData = await supabase
+        .from("items")
+        .select("*")
+        .eq("id", "ITEM" + id.toString());
+    }
+
+    // new id found
+    console.log(data);
+    await supabase.from("items").insert({
+      id: "ITEM" + id.toString(),
+      name: data.itemName,
+      imageUrl: "",
+      location: data.location[0],
+    });
+    const { data: boxes } = await supabase
+      .from("boxes")
+      .select("*")
+      .eq("id", data.location[0]);
+
+    if (!boxes || boxes.length === 0) {
+      console.error("Box not found");
+      return;
+    }
+
+    const box = boxes[0];
+    const newBoxItemsArray = [...(box.items || []), "ITEM" + id.toString()];
+
+    await supabase
+      .from("boxes")
+      .update({ items: newBoxItemsArray })
+      .eq("id", data.location[0]);
+
+    navigate(
+      "/dashboard?code=" +
+        accessCode +
+        "&msg=" +
+        encodeURIComponent(
+          "Item successfully created! Please print a code with Barcode ID: ITEM" +
+            id.toString()
+        )
+    );
+  };
+
   const boxOnSubmit: SubmitHandler<boxInputs> = (data) => console.log(data);
   const spaceOnSubmit: SubmitHandler<spaceInputs> = (data) => console.log(data);
 
@@ -128,13 +184,9 @@ const NewItem = () => {
     load();
   }, []);
 
-  const createItem = async () => {};
-  const createBox = async () => {};
-  const createSpace = async () => {};
-
   return (
     <>
-      {loading ? (
+      {loading || secondLoad ? (
         <VStack margin="auto" marginTop={"125px"}>
           <Spinner />
           <Text>Loading...</Text>
