@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import Catalog from "./pages/Catalog";
 import ItemDataPage from "./pages/ItemDataPage";
 import MoveHome from "./pages/MoveHome";
+import NewItem from "./pages/NewItem";
 
 const App = () => {
   return (
@@ -14,6 +15,7 @@ const App = () => {
         <Route path="/catalog" element={<Catalog />}></Route>
         <Route path="/item/:id" element={<ItemDataPage />} />
         <Route path="/item/:id/move" element={<MoveHome />} />
+        <Route path="/new" element={<NewItem />} />
       </Routes>
     </Router>
   );
