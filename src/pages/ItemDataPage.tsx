@@ -104,6 +104,8 @@ function ItemDataPage() {
           backgroundColor={"#27272a"}
           padding={"5px"}
           flexDir={"column"}
+          alignItems={"center"}
+          gap="3px"
         >
           <Text className="text" fontSize={"2xl"}>
             {itemData?.name}
@@ -116,6 +118,9 @@ function ItemDataPage() {
           <Text className="text" color={"#b0b0b0"}>
             Created on {isoToMMDDYY(itemData?.created_at)}
           </Text>
+          <Link to={"/box/" + itemData?.location + "?code=" + accessCode}>
+            <Button variant={"subtle"}>View Box</Button>
+          </Link>
         </Flex>
 
         <Group

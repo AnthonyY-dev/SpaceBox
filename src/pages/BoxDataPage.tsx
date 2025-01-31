@@ -1,10 +1,10 @@
-import DeleteSpaceModal from "@/components/custom/DeleteSpaceModal";
+import DeleteBoxModal from "@/components/custom/DeleteBoxModal";
 import { Avatar } from "@/components/ui/avatar";
 import isoToMMDDYY from "@/functions/isoToMMDDYY";
 import supabase from "@/hooks/supabase";
 import useAuthenticated from "@/hooks/useAuthenticated";
 import Box from "@/types/Box";
-import Space from "@/types/Space";
+import Item from "@/types/Item";
 import {
   VStack,
   Text,
@@ -17,45 +17,37 @@ import { useEffect, useState } from "react";
 import { LuX } from "react-icons/lu";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-const SpaceDataPage = () => {
+const BoxDataPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const accessCode = useAuthenticated();
 
-  const [space, setSpace] = useState<Space | null>(null);
-  const [boxes, setBoxes] = useState<Box[] | null>(null);
-
-  const [bError, setBError] = useState<string>("");
-  const [sError, setSError] = useState<string>("");
+  const [box, setBox] = useState<Box | null>(null);
+  const [items, setItems] = useState<Item[] | null>(null);
 
   const [bLoading, setBLoading] = useState<boolean>(true);
-  const [sLoading, setSLoading] = useState<boolean>(true);
+  const [iLoading, setILoading] = useState<boolean>(true);
 
   async function loadItems() {
-    const { data: SpaceData, error: SpaceError } = await supabase
-      .from("spaces")
+    const { data: BoxData, error: BoxError } = await supabase
+      .from("boxes")
       .select("*")
       .eq("id", id);
-    if (SpaceData?.length == 0) {
+    if (BoxData?.length == 0) {
       navigate("/catalog?code=" + accessCode);
     }
-    if (SpaceError) {
-      setSError("(" + SpaceError.code + ") " + SpaceError.message);
-    }
-    setSpace(SpaceData?.[0]);
-    setSLoading(false);
-    const { data: BoxesData, error: BoxError } = await supabase
-      .from("boxes")
-      .select("*");
+    if (!BoxError) {
+      setBox(BoxData?.[0]);
+      setBLoading(false);
+      const { data: ItemsData, error: _ } = await supabase
+        .from("items")
+        .select("*");
 
-    if (BoxesData?.length == 0) {
-      navigate("/catalog?code=" + accessCode);
+      if (!_) {
+        setItems(ItemsData);
+        setILoading(false);
+      }
     }
-    if (BoxError) {
-      setSError("(" + BoxError.code + ") " + BoxError.message);
-    }
-    setBoxes(BoxesData);
-    setBLoading(false);
   }
 
   useEffect(() => {
@@ -64,7 +56,7 @@ const SpaceDataPage = () => {
 
   return (
     <>
-      {bLoading || sLoading ? (
+      {bLoading || iLoading ? (
         <VStack margin="auto" marginTop={"125px"}>
           <Spinner />
           <Text>Loading...</Text>
@@ -75,13 +67,21 @@ const SpaceDataPage = () => {
             <VStack>
               <Flex flexDir={"column"} gap="10px">
                 <Avatar
-                  name={space?.spaceName}
+                  name={box?.boxName}
                   shape="rounded"
                   style={{ height: 150, width: 150 }}
-                  src={space?.spaceImageUrl}
+                  src={box?.boxImageUrl}
                 />
-
-                <DeleteSpaceModal accessCode={accessCode} spaceData={space} />
+                <Link to={"/space/" + box?.space + "?code=" + accessCode}>
+                  <Button
+                    variant={"outline"}
+                    colorPalette={"cyan"}
+                    width={"150px"}
+                  >
+                    View Space
+                  </Button>
+                </Link>
+                <DeleteBoxModal boxData={box} accessCode={accessCode} />
               </Flex>
             </VStack>
 
@@ -95,15 +95,15 @@ const SpaceDataPage = () => {
                 alignItems={"center"}
                 flexDir="column"
               >
-                <Text className="text">{space?.spaceName}</Text>
+                <Text className="text">{box?.boxName}</Text>
                 <Text className="pop">
-                  Created on {isoToMMDDYY(space?.created_at)}
+                  Created on {isoToMMDDYY(box?.created_at)}
                 </Text>
                 <Text className="pop" color="gray.500">
-                  Box Count: {space?.boxes.length}
+                  Item Count: {box?.items.length}
                 </Text>
                 <Text fontSize={"2xs"} color={"#2F2F2F"}>
-                  Space ID: {space?.id}
+                  Box ID: {box?.id}
                 </Text>
               </Flex>
               <Flex
@@ -113,15 +113,15 @@ const SpaceDataPage = () => {
                 flexDir={"column"}
                 gap={"10px"}
               >
-                {space?.boxes.map((boxInfo) => (
+                {box?.items.map((itemInfo) => (
                   <Link
                     to={
-                      "/box/" +
-                      boxes?.filter((box) => box.id == boxInfo)[0].id +
+                      "/item/" +
+                      items?.filter((item) => item.id == itemInfo)[0].id +
                       "?code=" +
                       accessCode
                     }
-                    key={boxes?.filter((box) => box.id == boxInfo)[0].id}
+                    key={items?.filter((item) => item.id == itemInfo)[0].id}
                   >
                     <Button
                       width={"full"}
@@ -133,14 +133,14 @@ const SpaceDataPage = () => {
                         height={"32px"}
                         shape={"rounded"}
                         name={
-                          boxes?.filter((box) => box.id == boxInfo)[0].boxName
+                          items?.filter((item) => item.id == itemInfo)[0].name
                         }
                         src={
-                          boxes?.filter((box) => box.id == boxInfo)[0]
-                            .boxImageUrl
+                          items?.filter((item) => item.id == itemInfo)[0]
+                            .imageUrl
                         }
                       ></Avatar>
-                      {boxes?.filter((box) => box.id == boxInfo)[0].boxName}
+                      {items?.filter((item) => item.id == itemInfo)[0].name}
                     </Button>
                   </Link>
                 ))}
@@ -163,4 +163,4 @@ const SpaceDataPage = () => {
   );
 };
 
-export default SpaceDataPage;
+export default BoxDataPage;

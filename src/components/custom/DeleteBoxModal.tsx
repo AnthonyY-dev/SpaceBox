@@ -18,32 +18,27 @@ import { useNavigate } from "react-router-dom";
 import Space from "@/types/Space";
 import { toaster } from "@/components/ui/toaster";
 interface Props {
-  spaceData: Space | null;
+  boxData: Box | null;
   accessCode: string | null;
 }
 
-const DeleteItemModal = (props: Props) => {
+const DeleteBoxModal = (props: Props) => {
   const navigate = useNavigate();
 
   const handleDeleteSpace = async () => {
-    if (props.spaceData?.boxes.length != 0) {
-      toaster.create({
-        title: "Error while deleting space",
-        description: "This space still has boxes inside of it.",
-        type: "error",
-        duration: 2000,
-      });
-      return;
-    }
-    await supabase.from("spaces").delete().eq("id", props.spaceData.id);
-    navigate("/catalog?code=" + props.accessCode);
+    toaster.create({
+      title: "Error",
+      description: "The box still has items in it!",
+      duration: 2000,
+      type: "error",
+    });
   };
 
   return (
     <DialogRoot role="alertdialog" size="full">
       <DialogTrigger asChild>
         <Button variant={"outline"} colorPalette={"red"}>
-          Delete Space
+          Delete Box
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -52,7 +47,7 @@ const DeleteItemModal = (props: Props) => {
         </DialogHeader>
         <DialogBody>
           <p>
-            This action cannot be undone. This will permanently delete the space
+            This action cannot be undone. This will permanently delete the box
             and remove it's data from our systems.
           </p>
         </DialogBody>
@@ -72,4 +67,4 @@ const DeleteItemModal = (props: Props) => {
   );
 };
 
-export default DeleteItemModal;
+export default DeleteBoxModal;

@@ -6,6 +6,8 @@ import ItemDataPage from "./pages/ItemDataPage";
 import MoveHome from "./pages/MoveHome";
 import NewItem from "./pages/NewItem";
 import SpaceDataPage from "./pages/SpaceDataPage";
+import { Toaster } from "@/components/ui/toaster";
+import BoxDataPage from "./pages/BoxDataPage";
 
 const App = () => {
   return (
@@ -18,7 +20,9 @@ const App = () => {
         <Route path="/item/:id/move" element={<MoveHome />} />
         <Route path="/new" element={<NewItem />} />
         <Route path="/space/:id" element={<SpaceDataPage />} />
+        <Route path="/box/:id" element={<BoxDataPage />} />
       </Routes>
+      <Toaster />
     </Router>
   );
 };
