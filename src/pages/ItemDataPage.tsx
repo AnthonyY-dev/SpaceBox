@@ -93,6 +93,7 @@ function ItemDataPage() {
           shape="rounded"
           style={{ height: 150, width: 150 }}
           src={itemData?.imageUrl}
+          name={itemData?.name}
         />
 
         <Flex
