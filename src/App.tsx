@@ -8,7 +8,6 @@ import NewItem from "./pages/NewItem";
 import SpaceDataPage from "./pages/SpaceDataPage";
 import { Toaster } from "@/components/ui/toaster";
 import BoxDataPage from "./pages/BoxDataPage";
-import Camera from "./pages/Camera";
 
 const App = () => {
   return (
