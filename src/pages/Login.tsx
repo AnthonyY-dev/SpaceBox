@@ -1,8 +1,7 @@
 import BarcodeReader from "@/components/custom/BarcodeReader";
-import { Button, Image, Text } from "@chakra-ui/react";
+import { Image, Text } from "@chakra-ui/react";
 import { useState } from "react";
-import { LuCamera } from "react-icons/lu";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [invalidMarker, setIM] = useState(false);

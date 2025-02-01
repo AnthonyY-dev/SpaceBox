@@ -81,7 +81,7 @@ const BoxDataPage = () => {
                     View Space
                   </Button>
                 </Link>
-                <DeleteBoxModal boxData={box} accessCode={accessCode} />
+                <DeleteBoxModal />
               </Flex>
             </VStack>
 

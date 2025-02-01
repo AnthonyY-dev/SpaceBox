@@ -25,8 +25,7 @@ const SpaceDataPage = () => {
   const [space, setSpace] = useState<Space | null>(null);
   const [boxes, setBoxes] = useState<Box[] | null>(null);
 
-  const [bError, setBError] = useState<string>("");
-  const [sError, setSError] = useState<string>("");
+  const [_, setSError] = useState<string>("");
 
   const [bLoading, setBLoading] = useState<boolean>(true);
   const [sLoading, setSLoading] = useState<boolean>(true);

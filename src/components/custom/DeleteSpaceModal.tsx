@@ -10,9 +10,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@chakra-ui/react";
-import { LuTrash } from "react-icons/lu";
-import Item from "@/types/Item";
-import Box from "@/types/Box";
 import supabase from "@/hooks/supabase";
 import { useNavigate } from "react-router-dom";
 import Space from "@/types/Space";

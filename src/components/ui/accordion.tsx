@@ -1,6 +1,5 @@
 import { Accordion, HStack } from "@chakra-ui/react";
 import * as React from "react";
-import { LuChevronDown } from "react-icons/lu";
 
 interface AccordionItemTriggerProps extends Accordion.ItemTriggerProps {
   indicatorPlacement?: "start" | "end";

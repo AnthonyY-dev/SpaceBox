@@ -4,8 +4,7 @@ import useAuthenticated from "@/hooks/useAuthenticated";
 import Box from "@/types/Box";
 import Item from "@/types/Item";
 import { Button, Flex, Spinner, Text, VStack } from "@chakra-ui/react";
-import { access } from "fs";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 const MoveHome = () => {
@@ -15,7 +14,7 @@ const MoveHome = () => {
 
   const [itemData, setItemData] = useState<Item | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [errorMsg, setErrorMsg] = useState<string>("");
+  const [_, setErrorMsg] = useState<string>("");
 
   const [boxesData, setBoxesData] = useState<Box[] | null>(null);
   const [oldBoxData, setOldBoxData] = useState<Box | null>(null);

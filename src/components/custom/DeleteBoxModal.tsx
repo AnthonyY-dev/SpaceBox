@@ -10,25 +10,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@chakra-ui/react";
-import { LuTrash } from "react-icons/lu";
-import Item from "@/types/Item";
-import Box from "@/types/Box";
-import supabase from "@/hooks/supabase";
-import { useNavigate } from "react-router-dom";
-import Space from "@/types/Space";
+// import { useNavigate } from "react-router-dom";
 import { toaster } from "@/components/ui/toaster";
-interface Props {
-  boxData: Box | null;
-  accessCode: string | null;
-}
 
-const DeleteBoxModal = (props: Props) => {
-  const navigate = useNavigate();
+const DeleteBoxModal = () => {
+  // const navigate = useNavigate();
 
   const handleDeleteSpace = async () => {
     toaster.create({
       title: "Error",
-      description: "The box still has items in it!",
+      description: "feature not done - will come in future",
       duration: 2000,
       type: "error",
     });
