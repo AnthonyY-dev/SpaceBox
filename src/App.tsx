@@ -8,6 +8,7 @@ import NewItem from "./pages/NewItem";
 import SpaceDataPage from "./pages/SpaceDataPage";
 import { Toaster } from "@/components/ui/toaster";
 import BoxDataPage from "./pages/BoxDataPage";
+import Settings from "./pages/Settings";
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/new" element={<NewItem />} />
         <Route path="/space/:id" element={<SpaceDataPage />} />
         <Route path="/box/:id" element={<BoxDataPage />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
       <Toaster />
     </Router>
